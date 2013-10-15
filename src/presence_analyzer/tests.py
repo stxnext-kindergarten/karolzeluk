@@ -8,6 +8,7 @@ import datetime
 import unittest
 import random
 import calendar
+from mock import patch
 from presence_analyzer import main, views, utils
 
 
@@ -135,6 +136,14 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertEqual(data[10][sample_date]['start'],
                          datetime.time(9, 39, 5))
 
+        with patch('csv.reader') as mock_reader:
+            mock_reader.return_value = [[],
+                                        [1, 2, 3, 4, 5],
+                                        ['3a', '2012-12-31', '0:0:0', '0:0:1'],
+                                        ['3', '2012-12-51', '0:0:0', '0:0:1']]
+            data = utils.get_data()
+            self.assertItemsEqual(data, {})
+
     def test_group_by_weekday(self):
         """
         Test grouping presence entries by weekday.
@@ -145,6 +154,37 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertItemsEqual(result.keys(), range(7))
         self.assertItemsEqual(result[2], [24465])
         self.assertItemsEqual(result[6], [])
+
+    def test_seconds_since_midnight(self):
+        sample_date = datetime.datetime(2013, 9, 10)
+
+        date = datetime.datetime(2013, 9, 10, 0, 0, 0)
+        delta = date - sample_date
+        result = utils.seconds_since_midnight(date)
+        self.assertEqual(int(delta.total_seconds()), result)
+
+        date = datetime.datetime(2013, 9, 10, 23, 59, 59)
+        delta = date - sample_date
+        result = utils.seconds_since_midnight(date)
+        self.assertEqual(int(delta.total_seconds()), result)
+
+    def test_interval(self):
+        start_date = datetime.datetime(2013, 9, 10, 1, 2, 3)
+
+        end_date = datetime.datetime(2013, 9, 10, 20, 50, 20)
+        delta = end_date - start_date
+        result = utils.interval(start_date, end_date)
+        self.assertEqual(int(delta.total_seconds()), result)
+
+        end_date = datetime.datetime(2013, 9, 10, 23, 59, 59)
+        delta = end_date - start_date
+        result = utils.interval(start_date, end_date)
+        self.assertEqual(int(delta.total_seconds()), result)
+
+    def test_mean(self):
+        self.assertEqual(utils.mean([]), 0)
+        items = [34]
+        self.assertEqual(utils.mean(items), 34)
 
 
 def suite():
