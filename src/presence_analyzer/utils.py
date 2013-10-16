@@ -6,7 +6,7 @@ Helper functions used in views.
 import csv
 from json import dumps
 from functools import wraps
-from datetime import datetime, time
+from datetime import datetime
 
 from flask import Response
 
@@ -60,33 +60,10 @@ def get_data():
                 end = datetime.strptime(row[3], '%H:%M:%S').time()
             except (ValueError, TypeError):
                 log.debug('Problem with line %d: ', i, exc_info=True)
-            else:
-                data.setdefault(user_id, {})[date] = {'start': start,
-                                                      'end': end}
+
+            data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
 
     return data
-
-
-def get_weekday_start_end(items):
-    """
-    Get start time and end time by weekdays
-    """
-    result = {}
-    for date in items:
-        week_day = date.weekday()
-        if not week_day in result.keys():
-            result[week_day] = {'start': [], 'end': []}
-        result[week_day]['start'].append(
-            seconds_since_midnight(items[date]['start'])
-        )
-        result[week_day]['end'].append(
-            seconds_since_midnight(items[date]['end'])
-        )
-
-    result = {key: {'start': int(mean(item['start'])),
-                    'end': int(mean(item['end']))}
-              for (key, item) in result.iteritems()}
-    return result
 
 
 def group_by_weekday(items):
@@ -106,18 +83,6 @@ def seconds_since_midnight(time):
     Calculates amount of seconds since midnight.
     """
     return time.hour * 3600 + time.minute * 60 + time.second
-
-
-def time_from_seconds(seconds):
-    """
-    Convert seconds since midgnight to time
-    """
-    hour, seconds = divmod(seconds, 3600)
-    minute, second = divmod(seconds, 60)
-    try:
-        return time(hour, minute, second)
-    except ValueError:
-        return None
 
 
 def interval(start, end):
