@@ -105,6 +105,34 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         result = []
         self.assertEqual(data, result)
 
+    def test_presence_start_end(self):
+        """
+        Test mean start and end time by weekday
+        """
+        user_id = 10
+        resp = self.client.get('/api/v1/presence_start_end/%s' % (user_id, ))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        d = datetime.date.today()
+        result = [[unicode(calendar.day_abbr[item_date.weekday()]),
+                   unicode(datetime.datetime.combine(
+                       d,
+                       item['start']).strftime('%Y-%m-%dT%H:%M:%S')),
+                   unicode(datetime.datetime.combine(
+                       d,
+                       item['end']).strftime('%Y-%m-%dT%H:%M:%S'))]
+                  for (item_date, item) in self.test_data[user_id].iteritems()]
+        self.assertItemsEqual(data, result)
+
+        fake_user_id = 1
+        resp = self.client.get('/api/v1/presence_start_end/%s' %
+                               (fake_user_id, ))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(data, [])
+
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
     """
@@ -182,9 +210,38 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertEqual(int(delta.total_seconds()), result)
 
     def test_mean(self):
+        """
+        Test calculating mean of list
+        """
         self.assertEqual(utils.mean([]), 0)
         items = [34]
         self.assertEqual(utils.mean(items), 34)
+
+    def test_time_from_seconds(self):
+        """
+        Test converting seconds from midnight to time
+        """
+        time = datetime.time(0, 0, 0)
+        self.assertEqual(time, utils.time_from_seconds(0))
+
+        time = datetime.time(23, 59, 59)
+        result = utils.time_from_seconds(utils.seconds_since_midnight(time))
+        self.assertEqual(time, result)
+
+        seconds = 4333333335
+        self.assertEqual(utils.time_from_seconds(seconds), None)
+
+    def test_get_weekday_start_end(self):
+        """
+        Test getting start and end time grouping by weekdays
+        """
+        data = utils.get_data()
+        result = utils.get_weekday_start_end(data[10])
+        correct_result = {1: {'start': 34745, 'end': 64792},
+                          2: {'start': 33592, 'end': 58057},
+                          3: {'start': 38926, 'end': 62631}}
+        self.assertEqual(result, correct_result)
+        self.assertEqual(utils.get_weekday_start_end({}), {})
 
 
 def suite():
