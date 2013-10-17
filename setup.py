@@ -27,6 +27,8 @@ setup(
     install_requires=[
         'setuptools',
         'Flask',
+        'mock',
+        'coverage'
     ],
     entry_points="""
     [console_scripts]
