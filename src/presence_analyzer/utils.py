@@ -61,7 +61,8 @@ def get_data():
             except (ValueError, TypeError):
                 log.debug('Problem with line %d: ', i, exc_info=True)
             else:
-                data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
+                data.setdefault(user_id, {})[date] = {'start': start,
+                                                      'end': end}
 
     return data
 
