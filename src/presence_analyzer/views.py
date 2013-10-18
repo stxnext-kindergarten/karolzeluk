@@ -54,9 +54,10 @@ def users_view():
     Users listing for dropdown.
     """
     data, avatar_base_url = get_users_data()
-    return [{'user_id': i,
-             'name': user['name'],
-             'avatar': '%s%s' % (avatar_base_url, user['avatar'])}
+    return [dict(user_id=i,
+                 name=user['name'],
+                 avatar='%s%s' % (avatar_base_url,
+                                  user['avatar']),)
             for (i, user) in data.iteritems()]
 
 

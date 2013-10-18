@@ -94,7 +94,8 @@ def get_users_data():
         users_element = root.find('users')
         for user in users_element.getchildren():
             user_data[user.get('id')] = {
-                element.tag: element.text for element in user.getchildren()
+                element.tag: element.text
+                for element in user.getchildren()
             }
     return user_data, avatar_base_url
 
