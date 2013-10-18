@@ -4,6 +4,7 @@ Helper functions used in views.
 """
 
 import csv
+from lxml import etree
 from json import dumps
 from functools import wraps
 from datetime import datetime, time
@@ -65,6 +66,37 @@ def get_data():
                                                       'end': end}
 
     return data
+
+
+def get_users_data():
+    """
+    Extracts users data from xml file
+
+    It creates structure like this:
+    {
+        'user_id':{
+            'avatar': avatar_url,
+            'name': name
+        }
+    }
+    """
+    user_data = {}
+    avatar_base_url = None
+    try:
+        tree = etree.parse(app.config['DATA_PATH'])
+    except IOError:
+        log.debug('Problem with parse xml file', exc_info=True)
+    else:
+        root = tree.getroot()
+        host = root.find('server').find('host').text
+        protocol = root.find('server').find('protocol').text
+        avatar_base_url = '%s://%s' % (protocol, host)
+        users_element = root.find('users')
+        for user in users_element.getchildren():
+            user_data[user.get('id')] = {
+                element.tag: element.text for element in user.getchildren()
+            }
+    return user_data, avatar_base_url
 
 
 def get_weekday_start_end(items):
