@@ -54,11 +54,17 @@ def users_view():
     Users listing for dropdown.
     """
     data, avatar_base_url = get_users_data()
-    return [dict(user_id=i,
-                 name=user['name'],
-                 avatar='%s%s' % (avatar_base_url,
-                                  user['avatar']),)
-            for (i, user) in data.iteritems()]
+    return [
+        dict(
+            user_id=i,
+            name=user['name'],
+            avatar='%s%s' % (
+                avatar_base_url,
+                user['avatar']
+            ),
+        )
+        for (i, user) in data.iteritems()
+    ]
 
 
 @app.route('/api/v1/mean_time_weekday/<int:user_id>', methods=['GET'])
