@@ -8,6 +8,9 @@ from functools import partial
 
 import paste.script.command
 import werkzeug.script
+import urllib2
+from datetime import datetime
+from time import ctime
 
 etc = partial(os.path.join, 'parts', 'etc')
 
@@ -111,3 +114,21 @@ def run():
         _serve('stop', dry_run=dry_run)
 
     werkzeug.script.run()
+
+
+def update_users_data():
+    def get_modify_date(path):
+        date = datetime.strptime(
+            ctime(os.path.getmtime(path)),
+            '%a %b %d %H:%M:%S %Y',
+        )
+        return date
+
+    app = make_app()
+    response = urllib2.urlopen(app.config['DATA_URL'])
+    modify_date = response.info()['Last-Modified']
+    modify_date = datetime.strptime(modify_date, '%a, %d %b %Y %H:%M:%S GMT')
+    if (not os.path.exists(app.config['DATA_PATH'])) or \
+       get_modify_date(app.config['DATA_PATH']) < modify_date:
+        with open(app.config['DATA_PATH'], 'wb') as user_file:
+            user_file.write(response.read())

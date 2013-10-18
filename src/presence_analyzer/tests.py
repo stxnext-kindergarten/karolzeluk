@@ -15,6 +15,9 @@ from presence_analyzer import main, views, utils
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
 )
+TEST_USERS_DATA = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_users.xml'
+)
 
 
 # pylint: disable=E1103
@@ -67,7 +70,14 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        self.assertDictEqual(data[0], {u'user_id': 10, u'name': u'User 10'})
+        self.assertDictEqual(
+            data[0],
+            {
+                u'user_id': u'176',
+                u'name': u'Adrian Kruszewski',
+                u'avatar': u'https://intranet.stxnext.pl/api/images/users/176'
+            }
+        )
 
     def test_mean_time_weekday(self):
         """
@@ -157,6 +167,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         Before each test, set up a environment.
         """
         main.app.config.update({'DATA_CSV': TEST_DATA_CSV})
+        main.app.config.update({'DATA_PATH': TEST_USERS_DATA})
 
     def tearDown(self):
         """
@@ -184,6 +195,26 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
                                         ['3', '2012-12-51', '0:0:0', '0:0:1']]
             data = utils.get_data()
             self.assertItemsEqual(data, {})
+
+    def test_get_users_data(self):
+        """
+        Test parsing xml with user data
+        """
+        data, base_avatar_url = utils.get_users_data()
+        self.assertDictEqual(
+            data,
+            {
+                '176': {
+                    'avatar': '/api/images/users/176',
+                    'name': 'Adrian Kruszewski'},
+                '141': {
+                    'avatar': '/api/images/users/141',
+                    'name': u'Adam Pie\u015bkiewicz',
+                },
+            }
+        )
+        main.app.config.update({'DATA_PATH': 'noexistspath'})
+        self.assertEqual(({}, None), utils.get_users_data())
 
     def test_group_by_weekday(self):
         """
