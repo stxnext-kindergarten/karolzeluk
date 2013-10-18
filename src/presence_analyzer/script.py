@@ -118,8 +118,10 @@ def run():
 
 def update_users_data():
     def get_modify_date(path):
-        date = datetime.strptime(ctime(os.path.getmtime(path)),
-                                 '%a %b %d %H:%M:%S %Y')
+        date = datetime.strptime(
+            ctime(os.path.getmtime(path)),
+            '%a %b %d %H:%M:%S %Y',
+        )
         return date
 
     app = make_app()

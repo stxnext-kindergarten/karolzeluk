@@ -70,12 +70,14 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        self.assertDictEqual(data[0],
-                             {u'user_id': u'176',
-                              u'name': u'Adrian Kruszewski',
-                              u'avatar': u'https://intranet.\
-stxnext.pl/api/images/users/176'}
-                             )
+        self.assertDictEqual(
+            data[0],
+            {
+                u'user_id': u'176',
+                u'name': u'Adrian Kruszewski',
+                u'avatar': u'https://intranet.stxnext.pl/api/images/users/176'
+            }
+        )
 
     def test_mean_time_weekday(self):
         """
@@ -199,11 +201,18 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         Test parsing xml with user data
         """
         data, base_avatar_url = utils.get_users_data()
-        self.assertDictEqual(data, {'176': {'avatar': '/api/images/users/176',
-                                            'name': 'Adrian Kruszewski'},
-                                    '141': {'avatar': '/api/images/users/141',
-                                            'name': u'Adam Pie\u015bkiewicz'}
-                                    })
+        self.assertDictEqual(
+            data,
+            {
+                '176': {
+                    'avatar': '/api/images/users/176',
+                    'name': 'Adrian Kruszewski'},
+                '141': {
+                    'avatar': '/api/images/users/141',
+                    'name': u'Adam Pie\u015bkiewicz',
+                },
+            }
+        )
         main.app.config.update({'DATA_PATH': 'noexistspath'})
         self.assertEqual(({}, None), utils.get_users_data())
 
