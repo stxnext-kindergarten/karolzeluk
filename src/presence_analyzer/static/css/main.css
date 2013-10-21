@@ -58,3 +58,7 @@ body {
     color: black;
     font-weight: bold;
 }
+
+#no_data {
+    display: None;
+}
