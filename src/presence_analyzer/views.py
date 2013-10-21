@@ -19,6 +19,7 @@ from presence_analyzer.utils import (
     get_weekday_start_end,
     time_from_seconds
 )
+import locale
 import logging
 log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
@@ -54,16 +55,23 @@ def users_view():
     Users listing for dropdown.
     """
     data, avatar_base_url = get_users_data()
+    sort_users = data.keys()
+    locale.setlocale(locale.LC_ALL, "")
+    sort_users.sort(
+        key=lambda user_id: data[user_id]['name'],
+        cmp=locale.strcoll
+    )
+    locale.setlocale(locale.LC_ALL, "C")
     return [
         dict(
-            user_id=i,
-            name=user['name'],
+            user_id=user_id,
+            name=data[user_id]['name'],
             avatar='%s%s' % (
                 avatar_base_url,
-                user['avatar']
+                data[user_id]['avatar']
             ),
         )
-        for (i, user) in data.iteritems()
+        for user_id in sort_users
     ]
 
 
