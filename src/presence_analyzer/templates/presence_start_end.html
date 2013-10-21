@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block start_end_selected %}id="selected"{% endblock %}
 
+{% block document_mode %}<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9" >{% enblock %}
+
 {% block extra_js %}
 <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart", "timeline"], 'language': 'pl'});
