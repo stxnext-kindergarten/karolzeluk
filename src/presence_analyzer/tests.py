@@ -71,7 +71,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
         self.assertDictEqual(
-            data[0],
+            data[1],
             {
                 u'user_id': u'176',
                 u'name': u'Adrian Kruszewski',
